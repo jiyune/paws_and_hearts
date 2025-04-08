@@ -4,7 +4,9 @@ class StartScene extends Phaser.Scene {
       super('StartScene');
     }
   
-    preload() {}
+    preload() {
+        this.load.audio('bgm', 'assets/bgm.mp3');
+    }
   
     create() {
       this.add.text(400, 200, '🐶 PAWS_AND_HEARTS 🐧', {
@@ -20,6 +22,16 @@ class StartScene extends Phaser.Scene {
       startBtn.on('pointerdown', () => {
         this.scene.start('IntroScene');
       });
+      
+      if (!this.sound.get('bgm')) {
+        const music = this.sound.add('bgm', { loop: true, volume: 0.5 });
+        music.play();
+    
+        // Optional global speichern
+        this.game.music = music;
+      }
+    
+      
     }
   }
   
@@ -43,7 +55,7 @@ class IntroScene extends Phaser.Scene {
         '',
         'Und... ich hab nur noch 1% Akku.',
         '',
-        'Kannst du mich bitte holen?',
+        'Kannst du mich bitte abholen?',
         '',
         '🐧💕'
         ];
@@ -116,7 +128,7 @@ class GameScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         //pingu
-        this.pingu = this.physics.add.staticSprite(150, 50, 'pingu').setScale(1.2);
+        this.pingu = this.physics.add.staticSprite(150, 50, 'pingu').setScale(1.0);
         this.pingu.dialogShown = false;
         this.pingu.setVisible(false);
         this.physics.add.overlap(this.player, this.pingu, () => {
@@ -124,7 +136,13 @@ class GameScene extends Phaser.Scene {
             this.pingu.dialogShown = true;
             this.showDialog('pingu', [
                 'Du hast mich gefunden!✨', 'Danke!', 'Ich habe dir ein paar Beeren für deinen Geburtstagskuchen gesammelt. 🍓', 'Lass uns zusammen nach Hause gehen.', 'I❤️U'
-              ], );        
+              ], () => {
+                    this.time.delayedCall(1000, () => {
+                    this.scene.start('EndScene');
+                  });
+                  
+              }
+            );        
         }
         });
 
@@ -330,7 +348,7 @@ class GameScene extends Phaser.Scene {
         this.aktuellesMinispiel = 'beeren'; // oder 'galgen' oder null
 
         this.beerenGefangen = 0;
-        this.beerenZiel = 1;
+        this.beerenZiel = 10;
         this.minispielAktiv = true;
       
         // Hintergrundbild anzeigen (statt dunklem Overlay)
@@ -578,7 +596,7 @@ class GameScene extends Phaser.Scene {
                     this.input.keyboard.removeListener('keydown', this.keyHandler);
                     this.keyHandler = null;
                   }
-                const woerter = ['pinguin', 'geburtstag', 'hund', 'herzchen', 'marmelade'];
+                const woerter = ['pinguin', 'geburtstag', 'pokemon', 'penis', 'boobs', 'zocken','einhorn', 'drache', 'love', `handsome`, 'cute', 'knuddeln', 'pikachu', 'Hundi', 'marmelade'];
                 this.zielwort = Phaser.Utils.Array.GetRandom(woerter).toUpperCase();
                 this.geraten = [];
                 this.fehler = 0;
@@ -592,7 +610,7 @@ class GameScene extends Phaser.Scene {
                     fill: '#ffaaaa'
                   }).setOrigin(0.5);
                   
-                this.anzeige = this.add.text(this.scale.width / 2, 150, '', {
+                this.anzeige = this.add.text(this.scale.width / 2, 140, '', {
                   fontSize: '40px',
                   fill: '#fff'
                 }).setOrigin(0.5);
@@ -602,7 +620,7 @@ class GameScene extends Phaser.Scene {
                   fill: '#ffcccc'
                 }).setOrigin(0.5);
 
-                this.preview = this.add.text(this.scale.width / 2, 100, this.zielwort.split('').map(() => '_').join(' '), {
+                this.preview = this.add.text(this.scale.width / 2, 150, this.zielwort.split('').map(() => '_').join(' '), {
                     fontSize: '40px',
                     fill: '#ffffaa',
                     stroke: '#000000',
@@ -642,8 +660,10 @@ class GameScene extends Phaser.Scene {
               
                   // 🧠 Reihenfolge angepasst!
 if (this.zielwort.split('').every(b => this.geraten.includes(b))) {
-    this.input.keyboard.removeListener('keydown', this.keyHandler);
+    const handler = this.keyHandler;
     this.keyHandler = null;
+    this.input.keyboard.removeListener('keydown', handler);
+
     this.time.delayedCall(500, () => {
       this.overlay?.destroy();
       this.anzeige?.destroy();
@@ -664,8 +684,10 @@ if (this.zielwort.split('').every(b => this.geraten.includes(b))) {
 
 
 } else if (this.fehler >= maxFehler) {
-    this.input.keyboard.removeListener('keydown', this.keyHandler);
+    const handler = this.keyHandler;
     this.keyHandler = null;
+    this.input.keyboard.removeListener('keydown', handler);
+
     this.time.delayedCall(500, () => {
       this.overlay?.destroy();
       this.anzeige?.destroy();
@@ -716,6 +738,48 @@ if (this.zielwort.split('').every(b => this.geraten.includes(b))) {
       
 
 }
+
+class EndScene extends Phaser.Scene {
+    constructor() {
+      super('EndScene');
+    }
+  
+    create() {
+      this.cameras.main.setBackgroundColor('#000');
+  
+      // 🎵 Musik abspielen (optional, wenn du Musik laden möchtest)
+      // this.sound.play('birthdaySong');
+  
+      // 🎉 Glückwunsch-Text
+      const text = this.add.text(this.scale.width / 2, this.scale.height / 2, 'Alles Gute zum Geburtstag! 🎉', {
+        fontSize: '40px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+      }).setOrigin(0.5).setAlpha(0);
+  
+      // ✨ Fade-in-Effekt
+      this.tweens.add({
+        targets: text,
+        alpha: 1,
+        duration: 2000,
+        ease: 'Power2'
+      });
+  
+      // ❤️ Deko (optional: fliegende Herzchen oder Konfetti)
+      this.time.delayedCall(3000, () => {
+        this.add.text(this.scale.width / 2, this.scale.height / 2 + 60, 'Von deiner liebsten Pingu🐧💛', {
+          fontSize: '24px',
+          fill: '#ffffff'
+        }).setOrigin(0.5);
+      });
+  
+      // 🔁 Option: Zurück zum Startmenü
+      this.input.once('pointerdown', () => {
+        this.scene.start('StartScene');
+      });
+    }
+  }
+  
   
   // ⚙️ Spiel-Config + Start
   const config = {
@@ -727,7 +791,7 @@ if (this.zielwort.split('').every(b => this.geraten.includes(b))) {
       default: 'arcade',
       arcade: { debug: false }
     },
-    scene: [StartScene, IntroScene, GameScene],
+    scene: [StartScene, IntroScene, GameScene, EndScene],
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH
