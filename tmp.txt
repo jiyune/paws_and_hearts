@@ -1,0 +1,86 @@
+    startBeerenMinispiel() {
+        this.beerenGefangen = 0;
+        this.beerenZiel = 1;
+        this.minispielAktiv = true;
+      
+        // Hintergrundbild anzeigen (statt dunklem Overlay)
+        const bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'minigame')
+          .setDisplaySize(this.scale.width, this.scale.height)
+          .setDepth(0); // ganz unten
+      
+        // Korb (Spieler)
+        const korb = this.physics.add.sprite(this.scale.width / 2, this.scale.height, 'korb')
+          .setScale(2.5)
+          .setDepth(1);
+        korb.setCollideWorldBounds(true);
+        korb.body.allowGravity = false;
+        this.minispielKorb = korb;
+
+        // 🍓 Zähler-Text anzeigen
+        this.beerenText = this.add.text(20, 20, 'Beeren: 0 / ' + this.beerenZiel, {
+        fontSize: '24px',
+        fill: '#ffffff'
+        }).setDepth(2).setShadow(2, 2, '#000', 2);
+  
+      
+        // Steuerung
+        this.minispielCursors = this.input.keyboard.createCursorKeys();
+      
+        // Beeren-Gruppe
+        const beeren = this.physics.add.group();
+        this.minispielBeeren = beeren;
+      
+        // Beeren spawnen
+        this.minispielTimer = this.time.addEvent({
+          delay: 800,
+          callback: () => {
+            const x = Phaser.Math.Between(50, this.scale.width - 50);
+            const b = beeren.create(x, -20, 'beere').setScale(2.0);
+            b.setVelocityY(200);
+            b.setDepth(1);
+          },
+          loop: true
+        });
+
+        // Boden-Zone, wo Beeren „verloren“ gehen
+        this.beerenBoden = this.physics.add.staticImage(
+            this.scale.width / 2,
+            this.scale.height + 20, // etwas unterhalb sichtbarem Bereich
+            null
+        ).setSize(this.scale.width, 40).setVisible(false);
+        
+        // Kollision mit Boden
+        this.physics.add.overlap(this.beerenBoden, this.minispielBeeren, (boden, beere) => {
+            beere.destroy();
+        
+            // 🧮 -1 Beere, aber nicht unter 0
+            this.beerenGefangen = Math.max(0, this.beerenGefangen - 1);
+            this.beerenText.setText('Beeren: ' + this.beerenGefangen + ' / ' + this.beerenZiel);
+        });
+  
+        // Kollision Korb <-> Beere
+        this.physics.add.overlap(korb, beeren, (korb, beere) => {
+          beere.destroy();
+          this.beerenGefangen++;
+          // 🆕 Beeren-Text aktualisieren
+          this.beerenText.setText('Beeren: ' + this.beerenGefangen + ' / ' + this.beerenZiel);
+          if (this.beerenGefangen >= this.beerenZiel) {
+            this.beendenBeerenMinispiel(bg, korb, beeren);
+          }
+        });        
+    }
+    beendenBeerenMinispiel(bg, korb, beeren) {
+        this.minispielAktiv = false;
+        this.minispielTimer.remove();
+        korb.destroy();
+        beeren.clear(true, true);
+        bg.destroy();
+        this.beerenText.destroy(); // 🍓 Counter entfernen
+        this.showDialog('hase', [
+          'Yay! Du hast genug Beeren gefangen! 🍓',
+          'Jetzt kann ich endlich Marmelade machen!'
+        ], () => {
+          this.fuchs.setVisible(true);
+          this.fuchs.body.enable = true;
+        });
+    }
