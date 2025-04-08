@@ -1,0 +1,42 @@
+[
+  {
+    "frage": "Was war unser erster gemeinsamer Urlaub?",
+    "antworten": ["Kajak fahren", "Campen", "Europapark"],
+    "korrekt": "Kajak fahren"
+  },
+  {
+    "frage": "Was ist unser Go-To-Restaurant für ein Date?",
+    "antworten": ["l'osteria", "jins haus", "la lucha"],
+    "korrekt": "la lucha"
+  },
+  {
+    "frage": "Was haben wir an unserem ersten Jahrestag gemacht?",
+    "antworten": ["Fotobox", "Europapark", "Phantasialand"],
+    "korrekt": "Europapark"
+  },
+  {
+    "frage": "Welches Getränk liebe ich am meisten?",
+    "antworten": ["Kakao", "Eiskaffee", "Bubble Tea"],
+    "korrekt": "Bubble Tea"
+  },
+  {
+    "frage": "Wo war unser erstes gemeinsames Picknick?",
+    "antworten": ["Rosenhöhe", "Orangerie", "Herrengarten"],
+    "korrekt": "Orangerie"
+  },
+  {
+    "frage": "Wer liebt mehr Popos 🍑?",
+    "antworten": ["ich", "du"],
+    "korrekt": "ich"
+  },
+  {
+    "frage": "Was ist ein Codewort, das nur wir verstehen?",
+    "antworten": ["was machen wir jetzt", "kaffeepause", "projekt blub"],
+    "korrekt": "was machen wir jetzt"
+  },
+  {
+    "frage": "Was sagst du, wenn du angeflirtet wirst?",
+    "antworten": ["여자친구 있어요", "안녕하세요", "사랑해"],
+    "korrekt": "여자친구 있어요"
+  }
+]

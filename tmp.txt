@@ -84,3 +84,212 @@
           this.fuchs.body.enable = true;
         });
     }
+
+
+
+
+
+
+    
+
+            // 👉 Funktion separat, damit man sie bei falscher Antwort wiederverwenden kann
+            zeigeRestaurantFrage() {
+                const frage = 'Was ist unser Go-To-Restaurant für ein Date?';
+                const antworten = ["l'osteria", "jins haus", "la lucha"];
+                const korrekt = "la lucha";
+            
+                const frageText = this.add.text(this.scale.width / 2, 100, frage, {
+                    fontSize: '22px',
+                    fill: '#000',
+                    align: 'center',
+                    wordWrap: { width: this.scale.width - 100 }
+                }).setOrigin(0.5);
+            
+                const antwortTextObjekte = [];
+            
+                antworten.forEach((antwort, index) => {
+                    const antwortText = this.add.text(this.scale.width / 2, 180 + index * 40, antwort, {
+                        fontSize: '20px',
+                        fill: '#003366',
+                        backgroundColor: '#eeeeee',
+                        padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive();
+            
+                    antwortText.on('pointerdown', () => {
+                        frageText.destroy();
+                        antwortTextObjekte.forEach(obj => obj.destroy());
+            
+                        if (antwort === korrekt) {
+                            this.showDialog('hase', [
+                                'Richtig! 🍝',
+                                'Der Fuchs wartet gleich da vorne!'
+                            ], () => {
+                                this.fuchs.setVisible(true);
+                                this.fuchs.body.enable = true;
+                            });
+                        } else {
+                            this.showDialog('hase', [
+                                'Hmm... leider falsch 😢',
+                                'Versuch es einfach nochmal!'
+                            ], () => {
+                                // 🔁 Wiederhole NUR die Frage
+                                this.zeigeRestaurantFrage();
+                            });
+                        }
+                    });
+            
+                    antwortTextObjekte.push(antwortText);
+                });
+            }
+
+            zeigeJahrestagFrage() {
+                const frage = "Was haben wir an unserem ersten Jahrestag gemacht?";
+                const antworten = ["Fotobox", "Europapark", "Phantasialand"];
+                const korrekt = "Europapark";
+            
+                const frageText = this.add.text(this.scale.width / 2, 100, frage, {
+                    fontSize: '22px',
+                    fill: '#000',
+                    align: 'center',
+                    wordWrap: { width: this.scale.width - 100 }
+                }).setOrigin(0.5);
+            
+                const antwortTextObjekte = [];
+            
+                antworten.forEach((antwort, index) => {
+                    const antwortText = this.add.text(this.scale.width / 2, 180 + index * 40, antwort, {
+                        fontSize: '20px',
+                        fill: '#003366',
+                        backgroundColor: '#eeeeee',
+                        padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive();
+            
+                    antwortText.on('pointerdown', () => {
+                        frageText.destroy();
+                        antwortTextObjekte.forEach(obj => obj.destroy());
+            
+                        if (antwort === korrekt) {
+                            this.showDialog('fuchs', [
+                                'Richtig! 🍝',
+                                'Ich kann dir aber leider nicht sagen, wo Pingu ist.',
+                                'Vielleicht weiß es das Eichhörnchen?',
+                                'Frag es mal!', 
+                                'Es ist im Haus im Wald.'
+                            ], () => {
+                                this.eichhoernchen.setVisible(true);
+                                this.eichhoernchen.body.enable = true;
+                            });
+                        } else {
+                            this.showDialog('fuchs', [
+                                'Entäuschend.. 😢',
+                                'Versuch es nochmal!'
+                            ], () => {
+                                // 🔁 Wiederhole NUR die Frage
+                                this.zeigeJahrestagFrage();
+                            });
+                        }
+                    });
+            
+                    antwortTextObjekte.push(antwortText);
+                });
+            }
+            zeigePopoFrage() {
+                const frage = "Wer liebt mehr Popos 🍑?";
+                const antworten = ["PINGU", "HUNDI"];
+                const korrekt = "PINGU";
+            
+                const frageText = this.add.text(this.scale.width / 2, 100, frage, {
+                    fontSize: '22px',
+                    fill: '#000',
+                    align: 'center',
+                    wordWrap: { width: this.scale.width - 100 }
+                }).setOrigin(0.5);
+            
+                const antwortTextObjekte = [];
+            
+                antworten.forEach((antwort, index) => {
+                    const antwortText = this.add.text(this.scale.width / 2, 180 + index * 40, antwort, {
+                        fontSize: '20px',
+                        fill: '#003366',
+                        backgroundColor: '#eeeeee',
+                        padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive();
+            
+                    antwortText.on('pointerdown', () => {
+                        frageText.destroy();
+                        antwortTextObjekte.forEach(obj => obj.destroy());
+            
+                        if (antwort === korrekt) {
+                            this.showDialog('eichhörnchen', [
+                                'Richtig! 🍝',
+                                'Ich glaube sie war bis eben noch mit der Ente unterwegs.',
+                                'Die Ente wohnt oben am Fluss.'
+                            ], () => {
+                                this.ente.setVisible(true);
+                                this.ente.body.enable = true;
+                            });
+                        } else {
+                            this.showDialog('fuchs', [
+                                'Leider falsch.. 😢',
+                                'Versuch es nochmal!'
+                            ], () => {
+                                // 🔁 Wiederhole NUR die Frage
+                                this.zeigePopoFrage();
+                            });
+                        }
+                    });
+            
+                    antwortTextObjekte.push(antwortText);
+                });
+            }
+
+
+            zeigeFlirtFrage() {
+                const frage = "Was sagst du, wenn du in Korea angeflirtet wirst?";
+                const antworten = ["여자친구 있어요", "안녕하세요", "사랑해"];
+                const korrekt = "여자친구 있어요";
+            
+                const frageText = this.add.text(this.scale.width / 2, 100, frage, {
+                    fontSize: '22px',
+                    fill: '#000',
+                    align: 'center',
+                    wordWrap: { width: this.scale.width - 100 }
+                }).setOrigin(0.5);
+            
+                const antwortTextObjekte = [];
+            
+                antworten.forEach((antwort, index) => {
+                    const antwortText = this.add.text(this.scale.width / 2, 180 + index * 40, antwort, {
+                        fontSize: '20px',
+                        fill: '#003366',
+                        backgroundColor: '#eeeeee',
+                        padding: { x: 10, y: 5 }
+                    }).setOrigin(0.5).setInteractive();
+            
+                    antwortText.on('pointerdown', () => {
+                        frageText.destroy();
+                        antwortTextObjekte.forEach(obj => obj.destroy());
+            
+                        if (antwort === korrekt) {
+                            this.showDialog('ente', [
+                                'Richtig!',
+                                'Pingu müsste im Beerenfeld ganz im Norden sein.',
+                                'Ich hoffe du findest sie!'
+                            ], () => {
+                                this.ente.setVisible(true);
+                                this.ente.body.enable = true;
+                            });
+                        } else {
+                            this.showDialog('fuchs', [
+                                'Leider falsch.. 😢',
+                                'Versuch es nochmal!'
+                            ], () => {
+                                // 🔁 Wiederhole NUR die Frage
+                                this.zeigeFlirtFrage();
+                            });
+                        }
+                    });
+            
+                    antwortTextObjekte.push(antwortText);
+                });
+            }

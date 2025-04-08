@@ -1,8 +1,3 @@
-import { QuizScene } from '/Minigames/QuizScene.js';
-import { BeerenMinigame } from '/Minigames/BeerenMinigame.js';
-
-
-
 // 🎬 Startszene
 class StartScene extends Phaser.Scene {
     constructor() {
@@ -98,13 +93,14 @@ class GameScene extends Phaser.Scene {
       this.load.image('katze', 'assets/sprites/katze.png');
       this.load.image('hase', 'assets/sprites/hase.png');
       this.load.image('hintergrund', 'assets/tilesets/boden.png');
-
+      this.load.image('beere', 'assets/sprites/beere.png');
+      this.load.image('korb', 'assets/sprites/korb.png'); 
+      this.load.image('minigame', 'assets/tilesets/minigame.png'); 
 
 
     }
   
     create() {
-
         // 🎬 Kamera sanft einblenden
         this.cameras.main.fadeIn(1000, 0, 0, 0);
       
@@ -119,7 +115,7 @@ class GameScene extends Phaser.Scene {
         this.cursors = this.input.keyboard.createCursorKeys();
 
         // 🐿️ Eichhörnchen
-        this.eichhoernchen = this.physics.add.staticSprite(120, 550, 'eichhörnchen').setScale(1.2);
+        this.eichhoernchen = this.physics.add.staticSprite(65, 190, 'eichhörnchen').setScale(1.2);
         this.eichhoernchen.dialogShown = false;
         this.eichhoernchen.setVisible(false);
         this.eichhoernchen.body.enable = false;
@@ -128,14 +124,14 @@ class GameScene extends Phaser.Scene {
         if (!this.eichhoernchen.dialogShown) {
             this.eichhoernchen.dialogShown = true;
             this.showDialog('eichhörnchen', [
-                'Hey du!',
-                'Pingu? Ich habe sie gesehen.',
-                'Aber einen Hinweis bekommst du erst nachdem du meine Frage richtig beantwortet hast!'
-              ], () => {
-                this.zeigePopoFrage();
+                "Weiß ich was über Pingu? Vielleicht. Vielleicht nicht. 😎",
+                "Aber du kannst es rausfinden… mit der richtigen Antwort!"              
+            ], () => {
+                this.zeigeJahrestagFrage(); // z. B. danach Spiel starten
               });        
         }
-        });
+        }
+    );
 
         // 🦆 Ente
         this.ente = this.physics.add.staticSprite(660, 190, 'ente').setScale(1.2);
@@ -146,57 +142,61 @@ class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.ente, () => {
             if (!this.ente.dialogShown) {
                 this.ente.dialogShown = true;
-                this.showDialog('ente', [
-                    'Hallo Hundi!',
-                    'Du suchst Pingu? Ich wir sind eben zusammen Beeren pflücken gewesen.',
-                    'Sie müsste noch im Beerenfeld sein.',
-                    'Wenn du die Frage richtig beantwortest, kann ich dir den Weg zeigen!'
+                this.showDialog('ente', ['Ohhh, jemand ist wohl auf Rettungsmission 🐾',
+                    'Pingu?',
+                    'Hm... Ich *könnte* wissen, wo sie ist...',
+                    'Aber warum sollte ich dir das einfach so verraten?',
+                    'Beweise mir erst, dass du klug genug bist!',
+                    'Ich stell dir eine Frage – und wenn du richtig liegst…',
+                    'verrat ich dir, wo’s langgeht! 😌✨'
                   ], () => {
-                    this.zeigeFlirtFrage();
+                    this.zeigeRestaurantFrage; // z. B. danach Spiel starten
                   });        
             }
-            });            
+            }
+        );             
 
 
         // 🦊 Fuchs – wird erst später freigeschaltet
-        this.fuchs = this.physics.add.staticSprite(120, 200, 'fuchs').setScale(1.2);
+        this.fuchs = this.physics.add.staticSprite(260, 550, 'fuchs').setScale(1.2);
         this.fuchs.setVisible(false);
         this.fuchs.body.enable = false;
         this.fuchs.dialogShown = false;
         this.physics.add.overlap(this.player, this.fuchs, () => {
             if (!this.fuchs.dialogShown) {
                 this.fuchs.dialogShown = true;
-                this.showDialog('fuchs', [
-                    'Pingu? Hm… vielleicht.',
-                    'Ich zeig dir den Weg, aber nur wenn du clever genug bist!',
-                    'Schaffst du mein Quiz? 😏'
-                  ],() => {
-                    this.zeigeJahrestagFrage();
-                }
-                );   
+                this.showDialog('fuchs', ['Ohhh, jemand ist wohl auf Rettungsmission 🐾',
+                    'Pingu?',
+                    'Hm... Ich *könnte* wissen, wo sie ist...',
+                    'Aber warum sollte ich dir das einfach so verraten?',
+                    'Beweise mir erst, dass du klug genug bist!',
+                    'Ich stell dir eine Frage – und wenn du richtig liegst…',
+                    'verrat ich dir, wo’s langgeht! 😌✨'
+                  ], () => {
+                    this.zeigeRestaurantFrage; // z. B. danach Spiel starten
+                  });        
             }
-            });
+            }
+        );
 
         // 🐰 Hase
         this.hase = this.physics.add.staticSprite(690, 520, 'hase').setScale(1.2);
         this.hase.dialogShown = false;
 
         this.physics.add.overlap(this.player, this.hase, () => {
-            if (!this.hase.dialogShown) {
-                this.hase.dialogShown = true;
-                this.showDialog('hase', [
-                    'Pingu hat sich verlaufen?',
-                    'Ich habe sie leider nicht gesehen…',
-                    'Aber ich habe gehört, dass der Fuchs etwas weiß…',
-                    'Frag ihn mal! 🦊',
-                    'Aber ich verrate dir erst, wo er ist, wenn du die nächste Frage richtig beantwortest!'
-                ], () => {
-                    this.zeigeRestaurantFrage();
-                });
-            }
-            
+        if (!this.hase.dialogShown) {
+            this.hase.dialogShown = true;
+            this.showDialog('hase', [
+                'Pingu hat sich verlaufen?',
+                'Ich habe sie leider nicht gesehen…',
+                'Aber bevor du gehst… darf ich dich um etwas bitten?',
+                'Ich brauche ganz dringend Beeren… für ein geheimes Rezept! 😳',
+                'Magst du ein paar für mich sammeln? 🍓✨'
+              ], () => {
+                this.startGalgenmaennchenMinispiel(); // z. B. danach Spiel starten
+              });        
+        }
         });
-        
 
         [this.eichhoernchen, this.ente, this.fuchs, this.hase].forEach(npc => {
             this.tweens.add({
@@ -236,7 +236,7 @@ class GameScene extends Phaser.Scene {
         this.blockers = this.physics.add.staticGroup();
         
         blockerData.forEach(([x, y, w, h]) => {
-            const blocker = this.add.rectangle(x, y, w, h, 0xff0000, 0); // rot-transparent zum Testen
+            const blocker = this.add.rectangle(x, y, w, h, 0xff0000, 0.3); // rot-transparent zum Testen
             this.physics.add.existing(blocker, true); // true = static
             this.blockers.add(blocker);
         });
@@ -258,8 +258,6 @@ class GameScene extends Phaser.Scene {
         backBtn.on('pointerdown', () => {
           this.scene.start('StartScene');
         });
-
-        
     }
 
     showDialog(portraitKey, dialogLines, onFinish = null) {
@@ -315,6 +313,93 @@ class GameScene extends Phaser.Scene {
         showLine(); // Starte mit erster Zeile
     }
     
+    startBeerenMinispiel() {
+        this.beerenGefangen = 0;
+        this.beerenZiel = 10;
+        this.minispielAktiv = true;
+      
+        // Hintergrundbild anzeigen (statt dunklem Overlay)
+        const bg = this.add.image(this.scale.width / 2, this.scale.height / 2, 'minigame')
+          .setDisplaySize(this.scale.width, this.scale.height)
+          .setDepth(0); // ganz unten
+      
+        // Korb (Spieler)
+        const korb = this.physics.add.sprite(this.scale.width / 2, this.scale.height, 'korb')
+          .setScale(2.5)
+          .setDepth(1);
+        korb.setCollideWorldBounds(true);
+        korb.body.allowGravity = false;
+        this.minispielKorb = korb;
+
+        // 🍓 Zähler-Text anzeigen
+        this.beerenText = this.add.text(20, 20, 'Beeren: 0 / ' + this.beerenZiel, {
+        fontSize: '24px',
+        fill: '#ffffff'
+        }).setDepth(2).setShadow(2, 2, '#000', 2);
+  
+      
+        // Steuerung
+        this.minispielCursors = this.input.keyboard.createCursorKeys();
+      
+        // Beeren-Gruppe
+        const beeren = this.physics.add.group();
+        this.minispielBeeren = beeren;
+      
+        // Beeren spawnen
+        this.minispielTimer = this.time.addEvent({
+          delay: 800,
+          callback: () => {
+            const x = Phaser.Math.Between(50, this.scale.width - 50);
+            const b = beeren.create(x, -20, 'beere').setScale(2.0);
+            b.setVelocityY(200);
+            b.setDepth(1);
+          },
+          loop: true
+        });
+        
+        // Boden-Zone, wo Beeren „verloren“ gehen
+        this.beerenBoden = this.physics.add.staticImage(
+            this.scale.width / 2,
+            this.scale.height + 20, // etwas unterhalb sichtbarem Bereich
+            null
+        ).setSize(this.scale.width, 40).setVisible(false);
+        
+        // Kollision mit Boden
+        this.physics.add.overlap(this.beerenBoden, this.minispielBeeren, (boden, beere) => {
+            beere.destroy();
+        
+            // 🧮 -1 Beere, aber nicht unter 0
+            this.beerenGefangen = Math.max(0, this.beerenGefangen - 1);
+            this.beerenText.setText('Beeren: ' + this.beerenGefangen + ' / ' + this.beerenZiel);
+        });
+  
+        // Kollision Korb <-> Beere
+        this.physics.add.overlap(korb, beeren, (korb, beere) => {
+          beere.destroy();
+          this.beerenGefangen++;
+          // 🆕 Beeren-Text aktualisieren
+          this.beerenText.setText('Beeren: ' + this.beerenGefangen + ' / ' + this.beerenZiel);
+          if (this.beerenGefangen >= this.beerenZiel) {
+            this.beendenBeerenMinispiel(bg, korb, beeren);
+          }
+        });        
+    }
+    beendenBeerenMinispiel(bg, korb, beeren) {
+        this.minispielAktiv = false;
+        this.minispielTimer.remove();
+        korb.destroy();
+        beeren.clear(true, true);
+        bg.destroy();
+        this.beerenText.destroy(); // 🍓 Counter entfernen
+        this.showDialog('hase', [
+          'Yay! Du hast genug Beeren gefangen! 🍓',
+          'Jetzt kann ich endlich Marmelade machen!',
+          'Und weißt du was? Der Fuchs will auch mit dir reden...'
+        ], () => {
+          this.fuchs.setVisible(true);
+          this.fuchs.body.enable = true;
+        });
+    }
 
             // 👉 Funktion separat, damit man sie bei falscher Antwort wiederverwenden kann
             zeigeRestaurantFrage() {
@@ -344,17 +429,19 @@ class GameScene extends Phaser.Scene {
                         antwortTextObjekte.forEach(obj => obj.destroy());
             
                         if (antwort === korrekt) {
-                            this.showDialog('hase', [
+                            this.showDialog('fuchs', [
                                 'Richtig! 🍝',
-                                'Der Fuchs wartet gleich da vorne!'
+                                'Aaaber...',
+                                'Sorry, ich habe gelogen. Ich weiß nicht wqo Pingu ist. 😳',
+                                'Frag doch mal das Eichhörnchen, vielleicht weiß es mehr.'
                             ], () => {
-                                this.fuchs.setVisible(true);
-                                this.fuchs.body.enable = true;
+                                this.eichhoernchen.setVisible(true);
+                                this.eichhoernchen.body.enable = true;
                             });
                         } else {
-                            this.showDialog('hase', [
-                                'Hmm... leider falsch 😢',
-                                'Versuch es einfach nochmal!'
+                            this.showDialog('fuchs', [
+                                'Enttäuschend..',
+                                'Versuch es nochmal!'
                             ], () => {
                                 // 🔁 Wiederhole NUR die Frage
                                 this.zeigeRestaurantFrage();
@@ -393,20 +480,18 @@ class GameScene extends Phaser.Scene {
                         antwortTextObjekte.forEach(obj => obj.destroy());
             
                         if (antwort === korrekt) {
-                            this.showDialog('fuchs', [
-                                'Richtig! 🍝',
-                                'Ich kann dir aber leider nicht sagen, wo Pingu ist.',
-                                'Vielleicht weiß es das Eichhörnchen?',
-                                'Frag es mal!', 
-                                'Es ist im Haus im Wald.'
+                            this.showDialog('eichhörnchen', [
+                                "Wow, das ist richtig",
+                                "Ich hab Pingu mit der Ente zusammen gesehen vorhin.",
+                                "Frag mal die Ente. Sie wohnt unten am Fluss. 🦆💧"
                             ], () => {
-                                this.eichhoernchen.setVisible(true);
-                                this.eichhoernchen.body.enable = true;
+                                this.ente.setVisible(true);
+                                this.ente.body.enable = true;
                             });
                         } else {
-                            this.showDialog('fuchs', [
-                                'Entäuschend.. 😢',
-                                'Versuch es nochmal!'
+                            this.showDialog('eichhörnchen', [
+                                "Ohhh... schade 😢",
+                                "Das war wohl nix. Versuch's nochmal – ich glaub an dich!"
                             ], () => {
                                 // 🔁 Wiederhole NUR die Frage
                                 this.zeigeJahrestagFrage();
@@ -417,56 +502,7 @@ class GameScene extends Phaser.Scene {
                     antwortTextObjekte.push(antwortText);
                 });
             }
-            zeigePopoFrage() {
-                const frage = "Wer liebt mehr Popos 🍑?";
-                const antworten = ["PINGU", "HUNDI"];
-                const korrekt = "PINGU";
-            
-                const frageText = this.add.text(this.scale.width / 2, 100, frage, {
-                    fontSize: '22px',
-                    fill: '#000',
-                    align: 'center',
-                    wordWrap: { width: this.scale.width - 100 }
-                }).setOrigin(0.5);
-            
-                const antwortTextObjekte = [];
-            
-                antworten.forEach((antwort, index) => {
-                    const antwortText = this.add.text(this.scale.width / 2, 180 + index * 40, antwort, {
-                        fontSize: '20px',
-                        fill: '#003366',
-                        backgroundColor: '#eeeeee',
-                        padding: { x: 10, y: 5 }
-                    }).setOrigin(0.5).setInteractive();
-            
-                    antwortText.on('pointerdown', () => {
-                        frageText.destroy();
-                        antwortTextObjekte.forEach(obj => obj.destroy());
-            
-                        if (antwort === korrekt) {
-                            this.showDialog('eichhörnchen', [
-                                'Richtig! 🍝',
-                                'Ich glaube sie war bis eben noch mit der Ente unterwegs.',
-                                'Die Ente wohnt oben am Fluss.'
-                            ], () => {
-                                this.ente.setVisible(true);
-                                this.ente.body.enable = true;
-                            });
-                        } else {
-                            this.showDialog('fuchs', [
-                                'Leider falsch.. 😢',
-                                'Versuch es nochmal!'
-                            ], () => {
-                                // 🔁 Wiederhole NUR die Frage
-                                this.zeigePopoFrage();
-                            });
-                        }
-                    });
-            
-                    antwortTextObjekte.push(antwortText);
-                });
-            }
-
+           
 
             zeigeFlirtFrage() {
                 const frage = "Was sagst du, wenn du in Korea angeflirtet wirst?";
@@ -518,6 +554,93 @@ class GameScene extends Phaser.Scene {
                 });
             }
 
+            startGalgenmaennchenMinispiel() {
+                this.minispielAktiv = true;
+              
+                const woerter = ['pinguin', 'geburtstag', 'hund', 'herzchen', 'marmelade'];
+                const zielwort = Phaser.Utils.Array.GetRandom(woerter).toUpperCase();
+                const geraten = [];
+                let fehler = 0;
+                const maxFehler = 6;
+                
+
+                const overlay = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000, 0.7);
+                
+                const falschText = this.add.text(this.scale.width / 2, 270, 'Falsch geraten: ', {
+                    fontSize: '20px',
+                    fill: '#ffaaaa'
+                  }).setOrigin(0.5);
+                  
+                const anzeige = this.add.text(this.scale.width / 2, 150, '', {
+                  fontSize: '40px',
+                  fill: '#fff'
+                }).setOrigin(0.5);
+              
+                const fehlText = this.add.text(this.scale.width / 2, 220, 'Fehler: 0 / ' + maxFehler, {
+                  fontSize: '24px',
+                  fill: '#ffcccc'
+                }).setOrigin(0.5);
+              
+                const updateAnzeige = () => {
+                  const text = zielwort.split('').map(b => geraten.includes(b) ? b : '_').join(' ');
+                  anzeige.setText(text);
+                  fehlText.setText(`Fehler: ${fehler} / ${maxFehler}`);
+                };
+              
+                updateAnzeige();
+              
+                const keyHandler = this.input.keyboard.on('keydown', (event) => {
+                  if (!event.key.match(/^[a-zA-Z]$/)) return;
+                  const buchstabe = event.key.toUpperCase();
+                  if (geraten.includes(buchstabe)) return;
+              
+                  geraten.push(buchstabe);
+
+                  const falsche = geraten.filter(b => !zielwort.includes(b));
+                  falschText.setText('Falsch geraten: ' + falsche.join(', '));
+                  
+                  if (!zielwort.includes(buchstabe)) {
+                    fehler++;
+                  }
+              
+                  updateAnzeige();
+                  
+              
+                  if (zielwort.split('').every(b => geraten.includes(b))) {
+                    this.input.keyboard.removeListener('keydown', keyHandler);
+                    this.time.delayedCall(500, () => {
+                      overlay.destroy();
+                      anzeige.destroy();
+                      fehlText.destroy();
+                      falschText.destroy();
+
+                      this.minispielAktiv = false;
+                      this.showDialog('hase', [
+                        'Wow, du hast das Wort erraten! 🥳',
+                        'Du bist echt schlau!'
+                      ]);
+                    });
+                  } else if (fehler >= maxFehler) {
+                    this.input.keyboard.removeListener('keydown', keyHandler);
+                    this.time.delayedCall(500, () => {
+                      overlay.destroy();
+                      anzeige.destroy();
+                      fehlText.destroy();
+                      falschText.destroy();
+
+                      this.minispielAktiv = false;
+                      this.showDialog('hase', [
+                        'Oh nein… 😢',
+                        'Das war wohl nix.',
+                        'Willst du es nochmal probieren?'
+                      ], () => {
+                        this.startGalgenmaennchenMinispiel(); // Spiel wird neu gestartet
+                      });
+                    });
+                  }
+                });
+              }
+
     update() {
         if (!this.minispielAktiv && this.player && this.cursors) {
           this.player.setVelocity(0);
@@ -536,26 +659,6 @@ class GameScene extends Phaser.Scene {
       }
       
 
-    startBeerenMinispiel() {
-        this.scene.pause(); // Pausiert GameScene
-        this.scene.launch('BeerenMinigame', {
-            zurueck: 'GameScene',
-            beerenZiel: 1,
-            onFinish: () => {
-                this.showDialog('hase', [
-                'Yay! Du hast genug Beeren gefangen! 🍓',
-                'Jetzt kann ich endlich Marmelade machen!'
-            ], () => {
-                this.fuchs.setVisible(true);
-                this.fuchs.body.enable = true;
-                });
-            }
-        });
-    }
-      
-
-      
-
 }
   
   // ⚙️ Spiel-Config + Start
@@ -568,7 +671,7 @@ class GameScene extends Phaser.Scene {
       default: 'arcade',
       arcade: { debug: false }
     },
-    scene: [StartScene, IntroScene, GameScene, BeerenMinigame, QuizScene],
+    scene: [StartScene, IntroScene, GameScene],
     scale: {
       mode: Phaser.Scale.FIT,
       autoCenter: Phaser.Scale.CENTER_BOTH
