@@ -96,6 +96,7 @@ class GameScene extends Phaser.Scene {
       this.load.image('beere', 'assets/sprites/beere.png');
       this.load.image('korb', 'assets/sprites/korb.png'); 
       this.load.image('minigame', 'assets/tilesets/minigame.png'); 
+      this.load.image('pingu', 'assets/sprites/pingu.png');
 
 
     }
@@ -113,6 +114,19 @@ class GameScene extends Phaser.Scene {
         this.player = this.physics.add.sprite(this.scale.width / 2, this.scale.height / 2, 'hund').setScale(1.2);
         this.player.setCollideWorldBounds(true);
         this.cursors = this.input.keyboard.createCursorKeys();
+
+        //pingu
+        this.pingu = this.physics.add.staticSprite(150, 50, 'pingu').setScale(1.2);
+        this.pingu.dialogShown = false;
+        this.pingu.setVisible(false);
+        this.physics.add.overlap(this.player, this.pingu, () => {
+        if (!this.pingu.dialogShown) {
+            this.pingu.dialogShown = true;
+            this.showDialog('pingu', [
+                'Du hast mich gefunden!✨', 'Danke!', 'Ich habe dir ein paar Beeren für deinen Geburtstagskuchen gesammelt. 🍓', 'Lass uns zusammen nach Hause gehen.', 'I❤️U'
+              ], );        
+        }
+        });
 
         // 🐿️ Eichhörnchen
         this.eichhoernchen = this.physics.add.staticSprite(65, 190, 'eichhörnchen').setScale(1.2);
@@ -142,15 +156,14 @@ class GameScene extends Phaser.Scene {
         this.physics.add.overlap(this.player, this.ente, () => {
             if (!this.ente.dialogShown) {
                 this.ente.dialogShown = true;
-                this.showDialog('ente', ['Ohhh, jemand ist wohl auf Rettungsmission 🐾',
-                    'Pingu?',
-                    'Hm... Ich *könnte* wissen, wo sie ist...',
-                    'Aber warum sollte ich dir das einfach so verraten?',
-                    'Beweise mir erst, dass du klug genug bist!',
-                    'Ich stell dir eine Frage – und wenn du richtig liegst…',
-                    'verrat ich dir, wo’s langgeht! 😌✨'
+                this.showDialog('ente', ['Quark',
+                    'Pingu habe ich gesehen!',
+                    'Wir waren zusammen Beeren pflücken.',
+                    'Sie ist bestimmt noch im Beerenfeld.',
+                    'Aber ich kann dir nicht einfach so helfen. 😏',
+                    'Nur wenn du das Wort richtig erräts, verrat ich dir, wo’s langgeht! 😌✨'
                   ], () => {
-                    this.zeigeRestaurantFrage; // z. B. danach Spiel starten
+                    this.startGalgenmaennchenMinispiel(); // z. B. danach Spiel starten
                   });        
             }
             }
@@ -173,7 +186,7 @@ class GameScene extends Phaser.Scene {
                     'Ich stell dir eine Frage – und wenn du richtig liegst…',
                     'verrat ich dir, wo’s langgeht! 😌✨'
                   ], () => {
-                    this.zeigeRestaurantFrage; // z. B. danach Spiel starten
+                    this.zeigeRestaurantFrage(); // z. B. danach Spiel starten
                   });        
             }
             }
@@ -193,12 +206,12 @@ class GameScene extends Phaser.Scene {
                 'Ich brauche ganz dringend Beeren… für ein geheimes Rezept! 😳',
                 'Magst du ein paar für mich sammeln? 🍓✨'
               ], () => {
-                this.startGalgenmaennchenMinispiel(); // z. B. danach Spiel starten
+                this.startBeerenMinispiel(); // z. B. danach Spiel starten
               });        
         }
         });
 
-        [this.eichhoernchen, this.ente, this.fuchs, this.hase].forEach(npc => {
+        [this.eichhoernchen, this.ente, this.fuchs, this.hase, this.pingu].forEach(npc => {
             this.tweens.add({
               targets: npc,
               y: npc.y - 5,
@@ -236,7 +249,7 @@ class GameScene extends Phaser.Scene {
         this.blockers = this.physics.add.staticGroup();
         
         blockerData.forEach(([x, y, w, h]) => {
-            const blocker = this.add.rectangle(x, y, w, h, 0xff0000, 0.3); // rot-transparent zum Testen
+            const blocker = this.add.rectangle(x, y, w, h, 0xff0000, 0.0); // rot-transparent zum Testen
             this.physics.add.existing(blocker, true); // true = static
             this.blockers.add(blocker);
         });
@@ -314,8 +327,10 @@ class GameScene extends Phaser.Scene {
     }
     
     startBeerenMinispiel() {
+        this.aktuellesMinispiel = 'beeren'; // oder 'galgen' oder null
+
         this.beerenGefangen = 0;
-        this.beerenZiel = 10;
+        this.beerenZiel = 1;
         this.minispielAktiv = true;
       
         // Hintergrundbild anzeigen (statt dunklem Overlay)
@@ -555,93 +570,127 @@ class GameScene extends Phaser.Scene {
             }
 
             startGalgenmaennchenMinispiel() {
+                console.log("Galgenmännchen startet...");
+                this.aktuellesMinispiel = 'galgen';
+
                 this.minispielAktiv = true;
-              
+                if (this.keyHandler) {
+                    this.input.keyboard.removeListener('keydown', this.keyHandler);
+                    this.keyHandler = null;
+                  }
                 const woerter = ['pinguin', 'geburtstag', 'hund', 'herzchen', 'marmelade'];
-                const zielwort = Phaser.Utils.Array.GetRandom(woerter).toUpperCase();
-                const geraten = [];
-                let fehler = 0;
+                this.zielwort = Phaser.Utils.Array.GetRandom(woerter).toUpperCase();
+                this.geraten = [];
+                this.fehler = 0;
                 const maxFehler = 6;
                 
 
-                const overlay = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000, 0.7);
+                this.overlay = this.add.rectangle(this.scale.width / 2, this.scale.height / 2, this.scale.width, this.scale.height, 0x000000, 0.7);
                 
-                const falschText = this.add.text(this.scale.width / 2, 270, 'Falsch geraten: ', {
+                this.falschText = this.add.text(this.scale.width / 2, 270, 'Falsch geraten: ', {
                     fontSize: '20px',
                     fill: '#ffaaaa'
                   }).setOrigin(0.5);
                   
-                const anzeige = this.add.text(this.scale.width / 2, 150, '', {
+                this.anzeige = this.add.text(this.scale.width / 2, 150, '', {
                   fontSize: '40px',
                   fill: '#fff'
                 }).setOrigin(0.5);
               
-                const fehlText = this.add.text(this.scale.width / 2, 220, 'Fehler: 0 / ' + maxFehler, {
+                this.fehlText = this.add.text(this.scale.width / 2, 220, 'Fehler: 0 / ' + maxFehler, {
                   fontSize: '24px',
                   fill: '#ffcccc'
                 }).setOrigin(0.5);
-              
+
+                this.preview = this.add.text(this.scale.width / 2, 100, this.zielwort.split('').map(() => '_').join(' '), {
+                    fontSize: '40px',
+                    fill: '#ffffaa',
+                    stroke: '#000000',
+                    strokeThickness: 4
+                  }).setOrigin(0.5);
+                  
+
                 const updateAnzeige = () => {
-                  const text = zielwort.split('').map(b => geraten.includes(b) ? b : '_').join(' ');
-                  anzeige.setText(text);
-                  fehlText.setText(`Fehler: ${fehler} / ${maxFehler}`);
+                    if (this.anzeige) {
+                        const text = this.zielwort.split('').map(b => this.geraten.includes(b) ? b : '_').join(' ');
+                        this.anzeige.setText(text);
+                      }
+                    if (this.fehlText) {
+                    this.fehlText.setText(`Fehler: ${this.fehler} / ${maxFehler}`);
+                    }
                 };
-              
+                
                 updateAnzeige();
-              
-                const keyHandler = this.input.keyboard.on('keydown', (event) => {
+                
+                this.input.keyboard.removeAllListeners('keydown');              
+                this.keyHandler = this.input.keyboard.on('keydown', (event) => {
                   if (!event.key.match(/^[a-zA-Z]$/)) return;
                   const buchstabe = event.key.toUpperCase();
-                  if (geraten.includes(buchstabe)) return;
+                  if (this.geraten.includes(buchstabe)) return;
               
-                  geraten.push(buchstabe);
+                  this.geraten.push(buchstabe);
 
-                  const falsche = geraten.filter(b => !zielwort.includes(b));
-                  falschText.setText('Falsch geraten: ' + falsche.join(', '));
+                  const falsche = this.geraten.filter(b => !this.zielwort.includes(b));
+                  this.falschText.setText('Falsch geraten: ' + falsche.join(', '));
                   
-                  if (!zielwort.includes(buchstabe)) {
-                    fehler++;
+                  if (!this.zielwort.includes(buchstabe)) {
+                    this.fehler++;
                   }
               
                   updateAnzeige();
                   
               
-                  if (zielwort.split('').every(b => geraten.includes(b))) {
-                    this.input.keyboard.removeListener('keydown', keyHandler);
-                    this.time.delayedCall(500, () => {
-                      overlay.destroy();
-                      anzeige.destroy();
-                      fehlText.destroy();
-                      falschText.destroy();
+                  // 🧠 Reihenfolge angepasst!
+if (this.zielwort.split('').every(b => this.geraten.includes(b))) {
+    this.input.keyboard.removeListener('keydown', this.keyHandler);
+    this.keyHandler = null;
+    this.time.delayedCall(500, () => {
+      this.overlay?.destroy();
+      this.anzeige?.destroy();
+      this.fehlText?.destroy();
+      this.falschText?.destroy();
+      this.preview?.destroy();
 
-                      this.minispielAktiv = false;
-                      this.showDialog('hase', [
-                        'Wow, du hast das Wort erraten! 🥳',
-                        'Du bist echt schlau!'
-                      ]);
-                    });
-                  } else if (fehler >= maxFehler) {
-                    this.input.keyboard.removeListener('keydown', keyHandler);
-                    this.time.delayedCall(500, () => {
-                      overlay.destroy();
-                      anzeige.destroy();
-                      fehlText.destroy();
-                      falschText.destroy();
+      this.minispielAktiv = false;
+      this.showDialog('hase', [
+        'Wow, du hast das Wort erraten! 🥳',
+        'Du bist echt schlau!', 'Pingu ist im Beerenfeld ganz im Norden.','Ich hoffe du findest sie!'
+      ], () => {
+        this.pingu.setVisible(true);
+        this.pingu.body.enable = true;
+      });
+    });
 
-                      this.minispielAktiv = false;
-                      this.showDialog('hase', [
-                        'Oh nein… 😢',
-                        'Das war wohl nix.',
-                        'Willst du es nochmal probieren?'
-                      ], () => {
-                        this.startGalgenmaennchenMinispiel(); // Spiel wird neu gestartet
-                      });
-                    });
-                  }
+
+
+} else if (this.fehler >= maxFehler) {
+    this.input.keyboard.removeListener('keydown', this.keyHandler);
+    this.keyHandler = null;
+    this.time.delayedCall(500, () => {
+      this.overlay?.destroy();
+      this.anzeige?.destroy();
+      this.fehlText?.destroy();
+      this.falschText?.destroy();
+      this.preview?.destroy();
+
+      this.minispielAktiv = false;
+      this.showDialog('hase', [
+        'Oh nein… 😢',
+        'Das war wohl nix.',
+        'Willst du es nochmal probieren?'
+      ], () => {
+        this.geraten = []; // Reset!
+        this.fehler = 0;   // Reset!
+        this.startGalgenmaennchenMinispiel(); // Spiel wird neu gestartet
+      });
+    });
+}
+
                 });
               }
 
     update() {
+        // 🐶 Spieler-Bewegung
         if (!this.minispielAktiv && this.player && this.cursors) {
           this.player.setVelocity(0);
           if (this.cursors.left.isDown) this.player.setVelocityX(-200);
@@ -650,12 +699,19 @@ class GameScene extends Phaser.Scene {
           else if (this.cursors.down.isDown) this.player.setVelocityY(200);
         }
       
-        // 🍓 Korb-Bewegung im Minispiel
-        if (this.minispielAktiv && this.minispielKorb && this.minispielCursors) {
-          this.minispielKorb.setVelocityX(0);
-          if (this.minispielCursors.left.isDown) this.minispielKorb.setVelocityX(-300);
-          else if (this.minispielCursors.right.isDown) this.minispielKorb.setVelocityX(300);
+        // 🍓 Korb-Bewegung nur beim Beeren-Minispiel!
+        if (
+            this.minispielAktiv &&
+            this.minispielKorb &&
+            this.minispielCursors &&
+            this.minispielKorb.setVelocityX 
+             && this.aktuellesMinispiel === 'beeren'
+        ) {
+            this.minispielKorb.setVelocityX(0);
+            if (this.minispielCursors.left.isDown) this.minispielKorb.setVelocityX(-300);
+            else if (this.minispielCursors.right.isDown) this.minispielKorb.setVelocityX(300);
         }
+  
       }
       
 
